@@ -102,5 +102,9 @@ def start():
     # Placeholder for future functionality
     return render_template('start.html', links = links)
 
+@app.route('/timer')
+def lock_In_timer():
+    return render_template('timer_scrn.html')
+
 if __name__ == "__main__":
     app.run(debug=True)
