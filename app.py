@@ -29,5 +29,9 @@ def index():
 def quiz():
     return render_template('quiz.html')
 
+@app.route('/timer')
+def lock_In_timer():
+    return render_template('timer_scrn.html')
+
 if __name__ == "__main__":
     app.run(debug=True)

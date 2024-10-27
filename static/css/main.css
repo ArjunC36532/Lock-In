@@ -24,3 +24,21 @@ h1 {
 .button:hover {
     background-color: #FFD700; /* Darker yellow on hover */
 }
+
+.HBO {
+    text-align: center;
+    font-family: "Monospace"
+
+}
+
+.buttontime {
+    padding: 25px 35px
+    
+}
+.buttontime:hover {
+    background-color: black;
+
+}
+.buttontime {
+    background-color:coral
+}
