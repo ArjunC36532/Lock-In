@@ -18,7 +18,7 @@ if (storedLinks) {
     allowedURLs.push(...storedLinks); // Add to allowed URLs if needed
 }
 
-// Your existing background.js code goes here...
+// Initialize the allowed URLs array
 const allowedURLs = ["https://chess.com"];  // Use the base URL without a trailing slash
 const redirectCooldown = 3000; // 3 seconds cooldown between redirects
 
@@ -28,6 +28,7 @@ const lastRedirectTime = {};
 // Function to check if the URL is allowed
 function isAllowed(url) {
     return allowedURLs.some(allowedURL => {
+        // Normalize URLs for comparison
         const normalizedAllowedURL = allowedURL.endsWith('/') ? allowedURL : allowedURL + '/';
         const normalizedURL = url.endsWith('/') ? url : url + '/';
         return normalizedURL.startsWith(normalizedAllowedURL);
@@ -47,7 +48,7 @@ chrome.webNavigation.onCommitted.addListener((details) => {
             // Update the last redirect time for this tab
             lastRedirectTime[tabId] = currentTime;
 
-            // Redirect to the allowed URL
+            // Redirect to the first allowed URL (or choose another logic to select a link)
             chrome.tabs.update(tabId, { url: allowedURLs[0] });
         }
     }
