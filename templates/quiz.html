@@ -2,14 +2,131 @@
 {% extends 'base.html' %}
 
 {%block css%}
-<link rel="stylesheet" href="{{url_for('static', filename = 'css/main.css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename = 'css/quiz.css')}}">
 {%endblock%}
 
 {%block head %}
-<title>Welcome Page</title>
+<title>Quiz Maker</title>
 {%endblock%}
 
 {%block body%}
-<h1>This is the Quiz Page</h1>
+    <div class="container">
+        <h1>What do you want to learn?</h1>
+        <input type="text" id="topicInput" placeholder="Enter a topic" />
+        <button onclick="getResponse()">Teach Me</button>
+        <button onclick="generateQuiz()" id="quizButton" style="display: none;">Quiz Me</button>
 
+        <div id="response" class="response"></div>
+        <div id="quiz" class="quiz"></div>
+    </div>
+
+    <script>
+        let questions = []; // Store the quiz questions
+        let currentQuestionIndex = 0; // Track current question index
+    
+        async function getResponse() {
+            const topic = document.getElementById("topicInput").value;
+            if (!topic) {
+                alert("Please enter a topic to learn about.");
+                return;
+            }
+    
+            const responseDiv = document.getElementById("response");
+            const quizButton = document.getElementById("quizButton");
+            responseDiv.innerHTML = "Loading...";  // Show loading message
+    
+            const response = await fetch("/learn", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ topic: topic })
+            });
+            
+            const data = await response.json();
+            if (data.error) {
+                responseDiv.innerHTML = "An error occurred: " + data.error;
+            } else {
+                responseDiv.innerHTML = `<strong>Response:</strong><br>${data.response}`;
+                quizButton.style.display = "inline";  // Show the Quiz button
+            }
+        }
+    
+        async function generateQuiz() {
+            const topic = document.getElementById("topicInput").value;
+            const quizDiv = document.getElementById("quiz");
+    
+            if (!topic) {
+                alert("Please enter a topic first.");
+                return;
+            }
+    
+            quizDiv.innerHTML = "Generating quiz...";  // Show loading message
+    
+            const response = await fetch("/quiz", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ topic: topic })
+            });
+            
+            const data = await response.json();
+            if (data.error) {
+                quizDiv.innerHTML = "An error occurred: " + data.error;
+            } else {
+                questions = data.questions;  // Store the questions
+                currentQuestionIndex = 0;
+                displayQuestion();  // Display the first question
+            }
+        }
+    
+        function displayQuestion() {
+            const quizDiv = document.getElementById("quiz");
+            const questionData = questions[currentQuestionIndex];
+    
+            quizDiv.innerHTML = `
+                <strong>Question ${currentQuestionIndex + 1}:</strong> ${questionData.question}<br><br>
+                ${questionData.options.map((option, index) => 
+                    `<button onclick="checkAnswer('${String.fromCharCode(65 + index)}')">${option}</button><br>`
+                ).join('')}
+            `;
+        }
+    
+        function checkAnswer(selectedAnswer) {
+            const quizDiv = document.getElementById("quiz");
+            const questionData = questions[currentQuestionIndex];
+            const isCorrect = selectedAnswer === questionData.correct_answer;
+    
+            // Display feedback on answer correctness
+            if (isCorrect) {
+                quizDiv.innerHTML += "<p style='color: green;'><strong>Correct!</strong></p>";
+            } else {
+                quizDiv.innerHTML += `<p style='color: red;'><strong>Incorrect!</strong> The correct answer was ${questionData.correct_answer}.</p>`;
+            }
+    
+            // Move to the next question after a short delay
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    displayQuestion();  // Display the next question
+                } else {
+                    // Quiz completed
+                    quizDiv.innerHTML += "<p><strong>Quiz Completed!</strong></p>";
+                    
+                    // Redirect to homepage after 3 seconds
+                    setTimeout(() => {
+                        // Clear the quiz and reset the page
+                        document.getElementById("topicInput").value = ""; // Clear input
+                        document.getElementById("response").innerHTML = ""; // Clear response
+                        document.getElementById("quizButton").style.display = "none"; // Hide quiz button
+                        quizDiv.innerHTML = ""; // Clear quiz div
+                    }, 3000);  // 3-second delay
+                }
+            }, 1500);  // 1.5-second delay for user to see feedback
+        }
+    </script>
+    
+    
+</body>
 {%endblock%}

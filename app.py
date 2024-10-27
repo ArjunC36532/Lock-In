@@ -1,10 +1,15 @@
+from multiprocessing import process
 from flask import Flask, render_template, url_for, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import openai
+import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
+key = os.getenv('API_KEY')
+openai.api_key =  key
 
 
 class Todo(db.Model):
